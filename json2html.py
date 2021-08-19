@@ -8,13 +8,21 @@ import os
 import json
 
 
+def tag(html_tag: str, text: str):
+    '''
+        Frames text with the HTML tag.
+    '''
+
+    return f"<{html_tag}>{text}</{html_tag}>"
+
+
 def json2html(json_records: list):
     '''
         Converts JSON file 'records'-like content to HTML string.
     '''
 
-    return ''.join(f"<h1>{record['title']}</h1><p>{record['body']}</p>"
-                   for record in json_records)
+    return ''.join(tag(html_tag, text) for record in json_records
+                   for html_tag, text in record.items())
 
 
 def __file_path(path: str):

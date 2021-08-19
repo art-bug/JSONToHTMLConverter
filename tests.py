@@ -2,17 +2,12 @@ from json2html import json2html
 
 test_json_records = [
     {
-        "title": "Title #1",
-        "body": "Hello, World 1!"
-    },
-    {
-        "title": "Title #2",
-        "body": "Hello, World 2!"
+        "h3": "Title #1",
+        "div": "Hello, World 1!"
     }
 ]
 
-required_html_string = "<h1>Title #1</h1><p>Hello, World 1!</p>"\
-                        "<h1>Title #2</h1><p>Hello, World 2!</p>"
+required_html_string = "<h3>Title #1</h3><div>Hello, World 1!</div>"
 
 
 def test_json2html():
