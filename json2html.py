@@ -7,6 +7,7 @@
 import argparse
 import os
 from collections.abc import Iterable
+from typing import List
 import functools
 import json
 
@@ -24,7 +25,9 @@ def record2html(json_record: dict):
         Converts JSON 'record' to a HTML string.
     '''
 
-    return ''.join(tag(*item) for item in json_record.items())
+    return ''.join(tag(html_tag, text) if type(text) is not list
+                   else tag(html_tag, json2html(text))
+                   for html_tag, text in json_record.items())
 
 
 def html_list(html_elements: Iterable[str]):
@@ -55,7 +58,7 @@ def as_html_list(func):
 
 
 @as_html_list
-def json2html(json_records: list):
+def json2html(json_records: List[dict]):
     '''
         Converts JSON file 'records'-like content to list of HTML elements.
     '''
