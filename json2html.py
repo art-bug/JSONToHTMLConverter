@@ -1,23 +1,50 @@
 '''
      This module contains the json2html function and various auxiliary
      functions and decorators for the task of
-     conversion JSON file 'records'-like content to a HTML list string.
+     conversion JSON file 'records'-like content to a HTML string.
 '''
 
 import argparse
+import json
 import os
 from collections.abc import Iterable
 from typing import List
 import functools
-import json
+import re
+import html
+
+
+def parse_css_selector(selector: str):
+    '''
+        Parses the CSS selector to the list of three items -
+        tag, id and class list.
+    '''
+
+    _tag = re.match(r"[a-z]+[1-9]?", selector).group()
+    _id = str()
+    classes = []
+
+    if '#' in selector:
+        _id = re.search(r"(?<=#)([\w-]+)", selector).group()
+
+    if '.' in selector:
+        classes = re.findall(r"(?<=\.)([\w-]+)", selector)
+
+    return [_tag, _id, classes]
 
 
 def tag(html_tag: str, text: str):
     '''
-        Frames text with the HTML tag.
+        Frames text with the HTML tag, the text escapes.
     '''
 
-    return f"<{html_tag}>{text}</{html_tag}>"
+    _tag, _id, classes = parse_css_selector(html_tag)
+    _id = f" id=\"{_id}\"" if _id else ''
+    _class = f" class=\"{' '.join(classes)}\"" if classes else ''
+
+    escaped_text = html.escape(text)
+
+    return f"<{_tag}{_id}{_class}>{escaped_text}</{_tag}>"
 
 
 def record2html(json_record: dict):
@@ -57,11 +84,33 @@ def as_html_list(func):
     return wrapper
 
 
-@as_html_list
-def json2html(json_records: List[dict]):
+def as_html_string(func):
+    '''
+        This decorator represents the HTML elements got from func
+        as a HTML string.
+    '''
+
+    def wrapper(*args, **kwargs):
+        html_elements = func(*args, **kwargs)
+
+        return ''.join(html_elements)
+
+    functools.update_wrapper(wrapper, func)
+
+    wrapper.__doc__ = "Converts JSON file 'records'-like content to "\
+                      "a HTML string."
+
+    return wrapper
+
+
+@as_html_string
+def json2html(json_records: List[dict] or dict):
     '''
         Converts JSON file 'records'-like content to list of HTML elements.
     '''
+
+    if isinstance(json_records, dict):
+        return [record2html(json_records)]
 
     return [record2html(record) for record in json_records]
 
